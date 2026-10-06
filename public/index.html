@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TikTok Widgets</title>
+<style>body{font-family:system-ui,'Noto Sans Thai',sans-serif;max-width:640px;margin:30px auto;padding:0 16px}input{padding:8px;width:60%;font:inherit}code{display:block;background:#eee;color:#111;padding:8px;margin:4px 0 14px;word-break:break-all;border-radius:6px}</style></head>
+<body><h2>TikTok Chat &amp; Gift Widgets</h2>
+<p>ใส่ชื่อ TikTok (ไม่ต้องมี @) หรือพิมพ์ <b>demo</b> เพื่อทดสอบ: <input id="u" value="demo"></p>
+<b>แชท</b><code id="c"></code><b>แจ้งเตือนของขวัญ / ติดตาม</b><code id="a"></code>
+<script>
+const u=document.getElementById('u'),f=()=>{const n=encodeURIComponent(u.value.trim().replace(/^@/,''));
+c.textContent=location.origin+'/chat.html?user='+n;a.textContent=location.origin+'/alerts.html?user='+n};
+u.oninput=f;f();
+</script></body></html>

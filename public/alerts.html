@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><title>TikTok Alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-family:'Prompt','Noto Sans Thai',system-ui,sans-serif}
+#a{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.c{display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;text-align:center;font-size:var(--s);text-shadow:0 2px 8px #000;animation:pop .5s both}
+.c.out{animation:bye .4s both}
+.c img{width:4em;height:4em;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.c b{color:#fe2c55;font-weight:700}.c .x{font-size:1.3em;font-weight:700}
+@keyframes pop{from{opacity:0;transform:scale(.4) translateY(30px)}60%{transform:scale(1.08)}}
+@keyframes bye{to{opacity:0;transform:scale(.8)}}
+</style></head>
+<body><div id="a"></div>
+<script>
+// ไม่ใส่ ?user= ก็ได้: จะมีช่องกรอกชื่อขึ้นมา (จำค่าไว้) / เอาเมาส์ไปชี้มุมซ้ายบนจะมีปุ่ม ⚙ ไว้เปลี่ยนชื่อ
+// ?user=ชื่อ TikTok  &dur=วินาทีต่ออัน  &min=ขั้นต่ำเพชรที่จะแจ้งเตือนของขวัญ  &follow=0 ปิดแจ้งเตือนกดติดตาม  &s=ขนาด px
+const q=new URLSearchParams(location.search),dur=(+q.get('dur')||5)*1000,min=+q.get('min')||0,follow=q.get('follow')!=='0';
+document.documentElement.style.setProperty('--s',(q.get('s')||32)+'px');
+const A=document.getElementById('a'),Q=[];let busy=false;
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+function next(){
+ if(busy||!Q.length)return;busy=true;const d=Q.shift(),c=el('div','c');
+ if(d.type==='gift'){
+  if(d.img){const i=el('img');i.src=d.img;i.onerror=()=>i.remove();c.appendChild(i)}
+  const l=el('div');l.append(el('b','',d.name),document.createTextNode(' ส่ง '+d.gift));
+  c.append(l,el('div','x','x'+d.count));
+ }else{const l=el('div');l.append(el('b','',d.name),document.createTextNode(' กดติดตามแล้ว!'));c.appendChild(l)}
+ A.appendChild(c);
+ setTimeout(()=>{c.classList.add('out');setTimeout(()=>{c.remove();busy=false;next()},400)},dur);
+}
+const onMsg=e=>{
+ const d=JSON.parse(e.data);
+ if(d.type==='gift'&&d.diamonds>=min||d.type==='follow'&&follow){Q.push(d);next()}
+};
+
+const reset=()=>{Q.length=0};
+
+let es,cur='';const K='tt_user',st=()=>{try{return localStorage.getItem(K)||''}catch{return''}};
+const mk=(t,css,x)=>{const e=document.createElement(t);e.style.cssText=css;if(x)e.textContent=x;return e};
+const gear=mk('button','position:fixed;top:6px;left:6px;width:30px;height:30px;border:0;border-radius:50%;background:#000a;color:#fff;font-size:16px;cursor:pointer;opacity:0;transition:opacity .2s;z-index:8','⚙');
+gear.title='เปลี่ยนชื่อ TikTok';gear.onmouseenter=()=>gear.style.opacity=1;gear.onmouseleave=()=>gear.style.opacity=0;
+const box=mk('div','position:fixed;top:8px;left:8px;background:#000c;color:#fff;padding:10px;border-radius:10px;font:14px system-ui,sans-serif;display:none;gap:6px;z-index:9');
+const inp=mk('input','padding:6px;border-radius:6px;border:0');inp.placeholder='ชื่อ TikTok (ไม่ต้องมี @)';
+const ok=mk('button','padding:6px 10px;border:0;border-radius:6px;background:#fe2c55;color:#fff;cursor:pointer','เชื่อมต่อ');
+box.append(inp,ok);document.body.append(gear,box);
+function show(){inp.value=cur;box.style.display='flex';gear.style.display='none';inp.focus()}
+function go(u){u=u.replace(/^@/,'').trim();if(!u)return;cur=u;try{localStorage.setItem(K,u)}catch{}if(es)es.close();reset();box.style.display='none';gear.style.display='';es=new EventSource('/events?user='+encodeURIComponent(u));es.onmessage=onMsg}
+gear.onclick=show;ok.onclick=()=>go(inp.value);inp.onkeydown=e=>{if(e.key==='Enter')go(inp.value)};
+const u0=q.get('user')||st();if(u0)go(u0);else show();
+</script></body></html>
