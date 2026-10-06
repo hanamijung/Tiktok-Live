@@ -1,0 +1,8 @@
+{
+  "name": "tiktok-stream-widgets",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "tiktok-live-connector": "^2.0.0" },
+  "engines": { "node": ">=18" }
+}
